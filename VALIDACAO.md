@@ -10,3 +10,5 @@
 - `wrangler deploy --dry-run` concluiu o empacotamento dos 17 arquivos públicos e do Worker, sem publicar.
 
 A publicação na conta Cloudflare, a conexão ao GitHub e a ativação do domínio dependem da configuração descrita no README. Nenhum banco local nem registro de orçamento gerado durante os testes está incluído no ZIP. Os testes automatizados contêm exemplos fictícios e senhas usadas apenas nesses testes, sem configurar o acesso publicado.
+
+Configuração de publicação atualizada: nome `finelinex`, D1 `e76b6a03-eb03-4f9a-bb21-703e148e8975`. `npm run build` passou e o empacotamento dry-run foi conferido com esse ID. O banco remoto não foi acessado neste ambiente.

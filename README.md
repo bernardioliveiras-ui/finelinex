@@ -15,6 +15,16 @@ Este pacote substitui a landing page anterior e acrescenta um painel em `/admin/
 
 O WhatsApp abre uma conversa com uma mensagem pronta. Esta versão não inclui um chatbot nem envio automático de mensagens pelo WhatsApp. Arquivos 3D são combinados e enviados pelo WhatsApp após a solicitação; o formulário não envia anexos.
 
+## Publicação desta versão — banco já criado
+
+Este pacote já usa o Worker `finelinex` e o banco D1 informado: `e76b6a03-eb03-4f9a-bb21-703e148e8975`. Para o repositório conectado à Cloudflare, substitua `wrangler.jsonc` pelo arquivo deste pacote.
+
+Em **Workers & Pages → finelinex → Settings → Builds**, configure **Build command: `npm run build`** e **Deploy command: `npm run deploy`**. Depois salve a alteração no GitHub e execute novamente o build. O comando de deploy aplica as duas migrações antes de publicar.
+
+Para liberar o login inicial do painel, abra **Settings → Variables and Secrets → Add**, escolha **Secret**, use o nome **`ADMIN_PASSWORD`** e escolha uma senha própria de 12 a 128 caracteres. Clique em **Deploy**. Entre em `/admin/` com o usuário `admin` e essa senha. Não coloque a senha no GitHub.
+
+A configuração do banco foi preenchida com o ID fornecido. A existência do banco na conta e as permissões do token de deploy serão confirmadas pelo próximo build na Cloudflare.
+
 ## 1. Primeira publicação — configuração assistida
 
 É necessário usar a sua conta Cloudflare. O pacote foi testado localmente e não está publicado na sua conta.
@@ -31,7 +41,7 @@ O assistente vai:
 1. Abrir o login da Cloudflare. Escolha a conta que administra seu domínio.
 2. Criar ou localizar o banco `fineline-db` e preencher o ID real em `wrangler.jsonc`.
 3. Aplicar a migração que prepara as tabelas, os produtos e os conteúdos iniciais.
-4. Publicar o Worker `fineline` e mostrar o endereço `workers.dev`.
+4. Publicar o Worker `finelinex` e mostrar o endereço `workers.dev`.
 5. Pedir que você escolha a senha inicial, de 12 a 128 caracteres, e armazená-la como secret `ADMIN_PASSWORD` na Cloudflare. Ela não vai para o GitHub.
 
 Se sua conta tiver várias contas Cloudflare, o Wrangler poderá pedir o `account_id`. Nesse caso, copie o ID da conta do domínio e adicione `"account_id": "SEU_ID"` em `wrangler.jsonc` antes de repetir a configuração.
@@ -51,7 +61,7 @@ Envie o `wrangler.jsonc` atualizado pelo assistente, que já contém o ID real d
 
 Não envie `node_modules`, `.dev.vars`, `.env` nem `.wrangler`. O `.gitignore` já exclui esses arquivos.
 
-Na Cloudflare, conecte esse repositório ao Worker **fineline**, em **Workers & Pages → fineline → Settings → Builds**. Se aparecer “Missing git connection”, conecte/autorize o GitHub e permita o acesso ao repositório `bernardioliveiras-ui/fineline`.
+Na Cloudflare, conecte esse repositório ao Worker **finelinex**, em **Workers & Pages → finelinex → Settings → Builds**. Se aparecer “Missing git connection”, conecte/autorize o GitHub e permita o acesso ao repositório `bernardioliveiras-ui/fineline`.
 
 | Campo | Valor |
 |---|---|
@@ -73,7 +83,7 @@ As alterações feitas no painel ficam no D1 e sobrevivem a novas publicações.
 1. Na zona `fineline3d.com.br` da Cloudflare, copie os **dois nameservers exibidos para a sua conta**.
 2. No Registro.br, abra o domínio e altere os servidores DNS para esses dois nameservers. Os nomes são específicos da sua conta; não use os de outra pessoa.
 3. Aguarde a zona aparecer como **Active** na Cloudflare.
-4. Em **Workers & Pages → fineline → Settings → Domains & Routes**, escolha **Add → Custom Domain** e adicione `fineline3d.com.br`.
+4. Em **Workers & Pages → finelinex → Settings → Domains & Routes**, escolha **Add → Custom Domain** e adicione `fineline3d.com.br`.
 5. Adicione também `www.fineline3d.com.br` se quiser que os dois endereços abram o site. Se já houver um registro antigo para esses nomes, use o procedimento de substituição indicado pela Cloudflare.
 6. Abra o site pelo domínio e faça um orçamento de teste. Confira a entrada no painel em `https://fineline3d.com.br/admin/`.
 
