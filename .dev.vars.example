@@ -1,0 +1,4 @@
+# Apenas desenvolvimento local. Copie para .dev.vars e defina a sua própria senha.
+ADMIN_PASSWORD=
+# Opcional: receber uma notificação por e-mail usando sua conta Web3Forms.
+# WEB3FORMS_ACCESS_KEY=

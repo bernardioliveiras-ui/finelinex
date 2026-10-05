@@ -1,0 +1,17 @@
+import {AppError} from './validation.js';
+const enc=new TextEncoder();
+export async function hash(value){const bytes=new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(value)));return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');}
+export async function checkPassword(given,secret){if(!secret||typeof given!=='string')return false;const a=await hash(given),b=await hash(secret);let delta=0;for(let i=0;i<a.length;i++)delta|=a.charCodeAt(i)^b.charCodeAt(i);return delta===0;}
+export function tokenFrom(request){return (request.headers.get('Cookie')||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('fineline_session='))?.slice(17)||'';}
+export async function requireSession(request,db){const token=tokenFrom(request);if(!/^[a-f0-9]{64}$/.test(token))throw new AppError('Faça login para continuar.',401);const h=await hash(token);const session=await db.prepare('SELECT s.expires_at,u.id,u.name,u.username,u.role,u.active FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash = ?').bind(h).first();if(!session||session.expires_at<=Date.now()||!session.active)throw new AppError('Sua sessão expirou. Entre novamente.',401);return {...session,session_hash:h};}
+export function cookie(token,request,clear=false){const host=new URL(request.url).hostname;const local=['localhost','127.0.0.1','[::1]'].includes(host);return `fineline_session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${clear?0:43200}${local&&new URL(request.url).protocol==='http:'?'':'; Secure'}`;}
+export async function newSession(db,userId,expectedHash){const bytes=crypto.getRandomValues(new Uint8Array(32));const token=Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');const r=await db.prepare('INSERT INTO sessions(token_hash,user_id,expires_at) SELECT ?,id,? FROM users WHERE id=? AND password_hash=? AND active=1').bind(await hash(token),Date.now()+43200000,userId,expectedHash).run();if(!r.meta.changes)throw new AppError('O acesso foi alterado durante a entrada. Entre novamente com a senha atual.',401);return token;}
+export async function rateLimit(request,db,scope,max,windowMs){const now=Date.now();const ip=request.headers.get('CF-Connecting-IP')||'local';const id=scope+':'+await hash(ip);const row=await db.prepare('INSERT INTO rate_limits(id,count,reset_at) VALUES(?,1,?) ON CONFLICT(id) DO UPDATE SET count=CASE WHEN reset_at<=? THEN 1 ELSE count+1 END, reset_at=CASE WHEN reset_at<=? THEN excluded.reset_at ELSE reset_at END RETURNING count,reset_at').bind(id,now+windowMs,now,now).first();if(row.count>max)throw new AppError('Muitas tentativas. Aguarde alguns minutos e tente novamente.',429);}
+
+export async function passwordHash(password,salt){
+ salt=salt||Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
+ const key=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveBits']);
+ const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:100000,hash:'SHA-256'},key,256);
+ const result=Array.from(new Uint8Array(bits),b=>b.toString(16).padStart(2,'0')).join('');return salt+':'+result;
+}
+export async function verifyPassword(password,stored){if(typeof password!=='string'||password.length>128)return false;const [salt,expected]=stored.split(':');const actual=(await passwordHash(password,salt)).split(':')[1];if(actual.length!==expected.length)return false;let diff=0;for(let i=0;i<actual.length;i++)diff|=actual.charCodeAt(i)^expected.charCodeAt(i);return diff===0;}
