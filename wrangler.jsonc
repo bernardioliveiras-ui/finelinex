@@ -1,8 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "fineline",
+  "name": "finelinex
+  ]",
   "main": "src/worker.js",
   "compatibility_date": "2026-10-05",
   "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
-  "d1_databases": [{ "binding": "DB", "database_name": "fineline-db", "database_id": "00000000-0000-0000-0000-000000000000", "migrations_dir": "migrations" }]
+  "d1_databases": [{ "binding": "DB", "database_name": "fineline-db", "database_id": "e76b6a03-eb03-4f9a-bb21-703e148e8975", "migrations_dir": "migrations" }]
 }
