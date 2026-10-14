@@ -1,0 +1,14 @@
+/* Calculadora integrada ao painel FINELINEX */
+.calculadora-panel{padding:24px}
+.calculadora-panel h2{margin:0 0 9px;font-size:22px}
+.calculadora-panel .lead{margin:0 0 21px}
+.fineline-widget-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.fineline-widget-grid label{margin:0;min-width:0}
+.fineline-widget-grid button{align-self:end}
+.fineline-calculadora-breakdown{margin:20px 0 0;display:grid;grid-template-columns:minmax(0,1fr) auto;max-width:740px;gap:11px 20px;background:#f3f7fb;border:1px solid #d9e5f0;border-radius:10px;padding:22px}
+.fineline-calculadora-breakdown dt{min-width:0;overflow-wrap:anywhere}
+.fineline-calculadora-breakdown dd{font-weight:700;margin:0;white-space:nowrap;text-align:right}
+.fineline-calculadora-breakdown dt:nth-last-of-type(-n+3),.fineline-calculadora-breakdown dd:nth-last-of-type(-n+3){color:#176bab}
+#fineline-calculadora-erro:not(:empty){color:#a62f34;font-weight:700}
+@media(max-width:960px){.fineline-widget-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.calculadora-panel{padding:17px}.fineline-widget-grid{grid-template-columns:1fr}.fineline-calculadora-breakdown{padding:14px;gap:10px;font-size:13px}}

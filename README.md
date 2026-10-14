@@ -1,6 +1,9 @@
-# Atualização 2.1.0 — Blog
+# FINELINEX 2.2.0 — pacote completo
 
-Consulte `ATUALIZACAO-BLOG.md` para publicar esta atualização e usar o blog no painel. A calculadora ainda não está incluída: o link de referência estava indisponível e é necessário receber o código ou uma referência acessível.
+Este pacote contém a **landing page, painel de gestão, orçamentos, catálogo, blog e calculadora de custos 3D**. O serviço Cloudflare Workers configurado é `finelinex`, correspondente ao repositório `bernardioliveiras-ui/finelinex`. A calculadora é interna do painel (perfil ADMIN), funciona no navegador e **não altera o banco**. Os cálculos são uma estimativa parametrizável, não uma reprodução validada de eventual ferramenta anterior.
+
+Consulte `FINELINEX-2.2.0-LEIA-ME.md` para instalar e publicar sem apagar os dados. O blog mantém a estrutura nativa da versão 2.1.0; não há migrações extras de blog.
+
 
 # Fine Line 3D — site e painel prontos para Cloudflare
 
@@ -23,7 +26,7 @@ O WhatsApp abre uma conversa com uma mensagem pronta. Esta versão não inclui u
 
 Este pacote já usa o Worker `finelinex` e o banco D1 informado: `e76b6a03-eb03-4f9a-bb21-703e148e8975`. Para o repositório conectado à Cloudflare, substitua `wrangler.jsonc` pelo arquivo deste pacote.
 
-Em **Workers & Pages → finelinex → Settings → Builds**, configure **Build command: `npm run build`** e **Deploy command: `npm run deploy`**. Depois salve a alteração no GitHub e execute novamente o build. O comando de deploy aplica as duas migrações antes de publicar.
+Em **Workers & Pages → finelinex → Settings → Builds**, configure **Build command: `npm run build`** e **Deploy command: `npm run deploy`**. Depois salve a alteração no GitHub e execute novamente o build. O comando de deploy aplica as migrações pendentes antes de publicar.
 
 Para liberar o login inicial do painel, abra **Settings → Variables and Secrets → Add**, escolha **Secret**, use o nome **`ADMIN_PASSWORD`** e escolha uma senha própria de 12 a 128 caracteres. Clique em **Deploy**. Entre em `/admin/` com o usuário `admin` e essa senha. Não coloque a senha no GitHub.
 
