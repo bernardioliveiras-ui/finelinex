@@ -1,3 +1,4 @@
+import {loadSource} from '/admin/blog-source.js';
 import {escapeHTML,renderArticleText} from '/blog-format.js';
 const $=s=>document.querySelector(s),form=$('#post-form'),dialog=$('#post-dialog'),fields=$('#post-fields');
 const keys=['title','slug','excerpt','content','cover_image','external_url'];
@@ -5,7 +6,7 @@ let current=null,baseline='',busy=false,requestInFlight=false;
 const values=()=>Object.fromEntries(keys.map(k=>[k,form.elements[k].value]));
 const dirty=()=>dialog.open&&JSON.stringify(values())!==baseline;
 function message(text,error=false){const el=$('#post-feedback');el.textContent=text;el.className='feedback '+(error?'error':'success');}
-async function request(path,method='GET',body){const r=await fetch(path,{method,credentials:'same-origin',cache:'no-store',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});const result=await r.json();if(!r.ok)throw Error(result.error||'Não foi possível concluir agora.');return result;}
+async function request(path,method='GET',body){const r=await fetch(path,{method,credentials:'same-origin',cache:'no-store',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});let result;try{result=await r.json();}catch{throw Error('O servidor não respondeu. Seu texto continua no editor.');}if(!r.ok)throw Error(result.error||'Não foi possível concluir agora.');return result;}
 function node(tag,text,cls){const el=document.createElement(tag);if(text)el.textContent=text;if(cls)el.className=cls;return el;}
 function describe(post){return post.published?(post.has_unpublished_changes?'Publicado · rascunho com alterações':'Publicado'):'Rascunho · visível somente para administradores';}
 async function load(){
@@ -40,4 +41,4 @@ async function save(action){
  catch(error){message(error.message,true);}finally{busy=false;fields.disabled=false;}
 }
 form.addEventListener('submit',event=>{event.preventDefault();save(event.submitter?.value||'draft');});$('#unpublish-post').addEventListener('click',()=>save('unpublish'));
-window.finelineBlog={load};
+window.finelineBlog={load:()=>Promise.all([load(),loadSource()])};

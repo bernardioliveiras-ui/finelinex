@@ -24,7 +24,7 @@ test('calculadora: rejeita quantidades inválidas, custos negativos e margens im
  assert.throws(()=>calcularCusto({...input,wastePct:101}),/Perdas/);
  assert.throws(()=>calcularCusto({...input,hours:NaN}),/Valor inválido/);
 });
-test('painel tem calculadora somente na navegação de administrador, sem alterar rotas públicas',()=>{
+test('painel preserva o acesso à calculadora de administrador e a configuração D1',()=>{
  const root=new URL('../',import.meta.url);
  const html=readFileSync(new URL('public/admin/index.html',root),'utf8');
  const script=readFileSync(new URL('public/admin/admin.js',root),'utf8');

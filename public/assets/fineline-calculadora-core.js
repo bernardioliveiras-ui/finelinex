@@ -1,5 +1,5 @@
 /** Calculadora Fine Line 3D. Valores monetários em BRL, custos do LOTE. */
-const nonnegative=(v,k)=>{const n=Number(v);if(!Number.isFinite(n)||n<0)throw new Error('Valor inválido: '+k);return n};
+const nonnegative=(v,k)=>{const n=Number(v);if(v===null||v===undefined||String(v).trim()===''||!Number.isFinite(n)||n<0||n>100000000)throw new Error('Valor inválido: '+k);return n};
 export function calcularCusto(input) {
  const grams=nonnegative(input.grams,'filamento (g)');
  const kgPrice=nonnegative(input.kgPrice,'preço do kg');
@@ -22,5 +22,6 @@ export function calcularCusto(input) {
  const lotTotal=material+energy+labor+packaging+extras;
  const unitCost=lotTotal/quantity;
  const suggestedPrice=unitCost/(1-marginPct/100);
+ if(![lotTotal,unitCost,suggestedPrice].every(Number.isFinite))throw new Error('Os valores informados excedem o limite de cálculo.');
  return {material,energy,labor,packaging,extras,lotTotal,unitCost,suggestedPrice,quantity,marginPct};
 }

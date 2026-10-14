@@ -1,7 +1,8 @@
+import {feedState,saveFeed,refreshFeed} from './blog-feed.js';
 import defaults from './defaults.js';
 import {AppError,validateQuote,validateProduct,validateSettings,validateUser,statuses} from './validation.js';
 import {checkPassword,cookie,newSession,requireSession,rateLimit,hash,tokenFrom,passwordHash,verifyPassword} from './auth.js';
-import {blogAdmin,blogPublic,listPublished,articleCards} from './blog.js';
+import {blogAdmin,blogPublic,listAllPublished,articleCards} from './blog.js';
 const csp="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'";
 function response(data,status=200,headers={}){return Response.json(data,{status,headers:{'Cache-Control':'no-store',...headers}});}
 function requireDb(env){if(!env.DB)throw new AppError('O recebimento de orçamentos ainda não está disponível. Entre em contato pelo WhatsApp.',503);return env.DB;}
@@ -48,6 +49,9 @@ async function api(request,env,ctx){const path=new URL(request.url).pathname,met
  const user=await requireSession(request,db);
  if(path==='/api/admin/session'&&method==='GET')return response({authenticated:true,user:{id:user.id,name:user.name,username:user.username,role:user.role}});
  if(!path.startsWith('/api/admin/quotes')&&path!=='/api/admin/password'&&user.role!=='ADMIN')throw new AppError('Seu acesso é de atendimento. Esta área é exclusiva do administrador.',403);
+ if(path==='/api/admin/blog-source'&&method==='GET')return response({source:await feedState(db)});
+ if(path==='/api/admin/blog-source'&&method==='PUT')return response({source:await saveFeed(db,await json(request))});
+ if(path==='/api/admin/blog-source/sync'&&method==='POST')return response({source:await refreshFeed(db,true)});
  if(path==='/api/admin/posts'||path.startsWith('/api/admin/posts/'))return response(await blogAdmin(db,path,method,()=>json(request,1100000)),method==='POST'?201:200);
  if(path==='/api/admin/quotes'&&method==='GET'){
   const rows=await db.prepare('SELECT * FROM quotes ORDER BY created_at DESC LIMIT 500').all();return response({quotes:rows.results});
@@ -93,22 +97,24 @@ async function api(request,env,ctx){const path=new URL(request.url).pathname,met
  }
  throw new AppError('Endereço não encontrado.',404);
 }
-export default {async fetch(request,env,ctx){
+export default {async scheduled(controller,env,ctx){await refreshFeed(env.DB,true);},async fetch(request,env,ctx){
  const u=new URL(request.url);let res;
  if(u.protocol==='http:'&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname)){u.protocol='https:';return Response.redirect(u.href,308);}
  try{
+  if((u.pathname==='/'||u.pathname==='/blog'||u.pathname.startsWith('/blog/'))&&env.DB&&ctx?.waitUntil)ctx.waitUntil(refreshFeed(env.DB).catch(e=>console.error('Atualização do blog:',e.message)));
   if(u.pathname.startsWith('/api/'))res=await api(request,env,ctx);
+  else if(['/calculadora','/calculadora/'].includes(u.pathname)){const asset=new URL(request.url);asset.pathname='/calculadora/';res=await env.ASSETS.fetch(new Request(asset,request));}
   else if(u.pathname==='/blog'||u.pathname.startsWith('/blog/')||u.pathname==='/sitemap.xml')res=await blogPublic(request,env.DB);
   else{
    res=await env.ASSETS.fetch(request);
    if((u.pathname==='/'||u.pathname==='/index.html')&&request.method==='GET'&&res.ok&&res.headers.get('content-type')?.includes('text/html')){
-    let posts=[];try{posts=await listPublished(env.DB,3);}catch{console.error('Blog indisponível; página principal preservada.');}
+    let posts=[];try{posts=await listAllPublished(env.DB,3);}catch{console.error('Blog indisponível; página principal preservada.');}
     const html=(await res.text()).replace('<!-- BLOG_POSTS -->',articleCards(posts)||'<p class="blog-empty">Novos conteúdos sobre impressão e modelagem 3D em breve.</p>');
     const headers=new Headers(res.headers);headers.set('Cache-Control','no-store');headers.delete('Content-Length');headers.delete('ETag');
     res=new Response(html,{status:res.status,headers});
    }
   }
  }
- catch(e){const status=e instanceof AppError?e.status:500;if(status===500)console.error('Falha na API FineLine:',e.message);res=response({error:status===500?'Não foi possível concluir agora. Tente novamente ou fale pelo WhatsApp.':e.message},status);}
+ catch(e){const status=e instanceof AppError?e.status:500;if(status===500)console.error('Falha na API FineLine:',e.message);res=response({error:status===500?(u.pathname.startsWith('/api/admin/')?'Não foi possível salvar no banco. Seu texto continua no editor. Confira o vínculo DB e a atualização do Worker.':'Não foi possível concluir agora. Tente novamente ou fale pelo WhatsApp.'):e.message},status);}
  const headers=new Headers(res.headers);headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','strict-origin-when-cross-origin');headers.set('X-Frame-Options','DENY');headers.set('Content-Security-Policy',csp);if(u.pathname.startsWith('/admin'))headers.set('Cache-Control','no-store');return new Response(request.method==='HEAD'?null:res.body,{status:res.status,statusText:res.statusText,headers});
 }};

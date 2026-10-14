@@ -19,7 +19,7 @@ export function validateQuote(v){
  if(v.has_file&&!['SIM','NAO'].includes(v.has_file))throw new AppError('Confira se possui o arquivo 3D.');
  const q={has_file:v.has_file||'NAO',request_id:id,nome:str(v.nome,120,true,'Nome'),email:str(v.email,180,true,'E-mail'),whatsapp:str(v.whatsapp,30),produto:str(v.produto,160),quantidade:v.quantidade===''||v.quantidade==null?1:Number(v.quantidade),prazo:str(v.prazo,120),descricao:str(v.descricao,5000,true,'Descrição')};
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(q.email))throw new AppError('Informe um e-mail válido.');
- if(q.whatsapp&&!/^[+()\d\s.-]{8,30}$/.test(q.whatsapp))throw new AppError('Confira o WhatsApp.');
+ if(q.whatsapp&&(!/^[+()\d\s.-]{8,30}$/.test(q.whatsapp)||!/^\d{10,15}$/.test(q.whatsapp.replace(/\D/g,''))))throw new AppError('Confira o WhatsApp.');
  if(!Number.isInteger(q.quantidade)||q.quantidade<1||q.quantidade>100000)throw new AppError('Informe uma quantidade de 1 a 100.000.');
  return q;
 }

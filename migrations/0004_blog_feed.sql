@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS blog_feed (
+ id INTEGER PRIMARY KEY CHECK (id=1),
+ url TEXT NOT NULL,
+ enabled INTEGER NOT NULL DEFAULT 0,
+ payload TEXT NOT NULL DEFAULT '[]',
+ version INTEGER NOT NULL DEFAULT 1,
+ last_sync TEXT,
+ last_error TEXT NOT NULL DEFAULT '',
+ last_checked INTEGER NOT NULL DEFAULT 0
+);
