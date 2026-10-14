@@ -28,6 +28,11 @@ export function validateProduct(v,id){
  const p={id,nome:str(v.nome,120,true,'Nome do produto'),tag:str(v.tag,80),desc:str(v.desc,2000,true,'Descrição'),img:url(v.img,true),links:[],active:v.active!==false,position:Number(v.position)||0};
  if(!Number.isInteger(p.position)||Math.abs(p.position)>10000)throw new AppError('Ordem inválida.');
  if(!Array.isArray(v.links)||v.links.length>5)throw new AppError('Use até cinco links de compra.');
+ // Mantém referência e preço informativo ao editar um produto real da Shopee.
+ if(v.source==='shopee'){
+  p.source='shopee';p.shopId=str(v.shopId||'456103442',30);
+  p.preco=str(v.preco||'',70);p.precoEm=str(v.precoEm||'',12);
+ }
  p.links=v.links.map(l=>({l:str(l.l,70,true,'Texto do link'),u:url(l.u)}));
  if(p.links.some(l=>!l.u))throw new AppError('Preencha o link de compra.');
  return p;

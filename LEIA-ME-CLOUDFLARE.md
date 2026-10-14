@@ -1,9 +1,12 @@
-# Fine Line 3D 2.3.1 — atualização completa
+# Fine Line 3D 2.4.0 — atualização completa
+
+**Novidade:** catálogo Shopee REAL integrado com fotos e links de anúncios oficiais, com importação CSV. Leia `INTEGRACAO-CATALOGO-SHOPEE.md`.
 
 ## O que você receberá
 
 - Calculadora pública em **https://fineline3d.com.br/calculadora**, sem login, acessível pelo menu e pela LP. O cliente pode levar a simulação para o formulário de orçamento.
 - Calculadora também disponível no admin; o arquivo JavaScript que antes apontava para o local errado foi corrigido.
+- Catálogo com 9 anúncios verdadeiros da loja `shopee.com.br/vini.store_` e sem links fictícios do Mercado Livre. Produtos personalizados já cadastrados são preservados.
 - Blog criado pelo admin: salvar rascunho, publicar, editar, retirar e compartilhar. Publicações aparecem imediatamente na LP.
 - Integração com Blogger: conecta um endereço `blogspot.com`, traz até 50 artigos do feed, mostra as três publicações mais recentes na LP e permite leitura dentro do seu domínio. Atualiza aproximadamente a cada 15 minutos, com botão “Atualizar agora”.
 - Artigos sem título usam a primeira linha do texto. HTML externo não é executado. Se o Blogger ficar indisponível, mantém os últimos artigos sincronizados.
@@ -72,7 +75,7 @@ A calculadora usa os custos informados pelo visitante. Não é uma cotação aut
 
 ## Validação deste pacote
 
-Os resultados estão em `VALIDACAO-2.3.1.md`. A publicação na sua conta Cloudflare ainda precisa ser realizada com os passos acima; nenhum deploy remoto foi executado durante a preparação.
+Os resultados estão em `VALIDACAO-2.4.0.md`. A publicação na sua conta Cloudflare ainda precisa ser realizada com os passos acima; nenhum deploy remoto foi executado durante a preparação.
 
 Referências oficiais:
 - https://developers.cloudflare.com/workers/ci-cd/builds/configuration/

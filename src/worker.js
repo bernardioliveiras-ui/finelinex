@@ -1,5 +1,6 @@
 import {feedState,saveFeed,refreshFeed,testBlogFeed} from './blog-feed.js';
 import defaults from './defaults.js';
+import {shopeePreview,importShopee} from './shopee-import.js';
 import {AppError,validateQuote,validateProduct,validateSettings,validateUser,statuses} from './validation.js';
 import {checkPassword,cookie,newSession,requireSession,rateLimit,hash,tokenFrom,passwordHash,verifyPassword} from './auth.js';
 import {blogAdmin,blogPublic,listAllPublished,articleCards} from './blog.js';
@@ -81,9 +82,11 @@ async function api(request,env,ctx){const path=new URL(request.url).pathname,met
  if(path==='/api/admin/password'&&method==='POST'){
   const b=await json(request);const current=await db.prepare('SELECT password_hash FROM users WHERE id=?').bind(user.id).first();if(!await verifyPassword(b.current_password,current.password_hash))throw new AppError('Senha atual incorreta.');if(typeof b.password!=='string'||b.password.length<12||b.password.length>128)throw new AppError('Use uma senha de 12 a 128 caracteres.');await db.prepare('UPDATE users SET password_hash=? WHERE id=?').bind(await passwordHash(b.password),user.id).run();await db.prepare('DELETE FROM sessions WHERE user_id=? AND token_hash!=?').bind(user.id,user.session_hash).run();return response({ok:true});
  }
+ if(path==='/api/admin/shopee/preview'&&method==='GET')return response(shopeePreview());
+ if(path==='/api/admin/shopee/import'&&method==='POST')return response(await importShopee(db,await json(request,550000)));
  if(path==='/api/admin/products'&&method==='GET')return response({products:await products(db)});
  if(path==='/api/admin/products'&&method==='POST'){
-  const count=await db.prepare('SELECT COUNT(*) AS n FROM products').first();if(count.n>=60)throw new AppError('O catálogo aceita até 60 produtos.');
+  const count=await db.prepare('SELECT COUNT(*) AS n FROM products').first();if(count.n>=250)throw new AppError('O catálogo aceita até 250 produtos.');
   const p=validateProduct(await json(request,1100000),crypto.randomUUID());
   await db.prepare('INSERT INTO products(id,payload,position,active) VALUES(?,?,?,?)').bind(p.id,JSON.stringify(p),p.position,p.active?1:0).run();return response({product:p},201);
  }

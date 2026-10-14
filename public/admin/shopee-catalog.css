@@ -1,0 +1,17 @@
+/* Integração de catálogo: painel pequeno e responsivo */
+.shopee-integration{margin-top:25px}
+.shopee-integration h2{margin-bottom:12px}
+.shopee-integration>p{margin-bottom:12px}
+.shopee-integration a[href*="shopee.com.br"]{color:#d44e26}
+.shopee-integration .checkbox{margin:17px 0}
+.shopee-import-preview{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin:18px 0}
+.shopee-import-preview:empty{display:none}
+.shopee-import-item{min-width:0;border:1px solid var(--line);border-radius:9px;padding:12px;background:#f8fafc}
+.shopee-import-item img{height:120px;width:100%;object-fit:contain;margin:0 0 7px;background:#fff}
+.shopee-import-item strong{font-size:13px;display:block;min-height:34px}
+.shopee-import-item small{display:block;color:var(--muted);font-size:11px}
+.shopee-csv-title{margin-top:26px!important}
+.shopee-integration #shopee-csv-file{max-width:620px}
+@media(max-width:600px){.shopee-import-preview{grid-template-columns:repeat(2,minmax(0,1fr))}.shopee-integration .form-actions{align-items:stretch;flex-direction:column}.shopee-integration .form-actions button{width:100%}}
+/* Imagens da Shopee também sem recorte no Admin. */
+#product-list .product-card>img{object-fit:contain;padding:10px;background:#f8fafc}
