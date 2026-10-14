@@ -1,0 +1,12 @@
+.fineline-admin-widget{font-family:inherit;color:inherit;max-width:1050px;padding:1rem}
+.fineline-admin-widget h2{font-size:1.5rem}
+.fineline-widget-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:1rem}
+.fineline-widget-grid label{display:flex;flex-direction:column;gap:.35rem;font-weight:600}
+.fineline-widget-grid input,.fineline-widget-grid textarea,.fineline-widget-grid select{font:inherit;color:#20362b;background:white;border:1px solid #9baaa1;padding:.65rem;border-radius:8px}
+.fineline-widget-grid textarea{min-height:120px}
+.fineline-widget-grid button,.fineline-blog-buttons button{background:#146b49;color:#fff;font:inherit;font-weight:600;border:0;border-radius:8px;padding:.65rem 1rem;cursor:pointer}
+.fineline-blog-buttons{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem}
+.fineline-calculadora-breakdown{display:grid;grid-template-columns:1fr auto;gap:.5rem;max-width:650px;background:#f3f8f5;padding:1rem;border-radius:12px;color:#162d22}
+.fineline-calculadora-breakdown dd{margin:0;font-weight:700;text-align:right}
+.fineline-blog-admin-list{margin-top:1.5rem}.fineline-blog-admin-list article{padding:1rem 0;border-bottom:1px solid #d5dfd8}
+.fineline-widget-alert{font-weight:600;min-height:1.2rem}

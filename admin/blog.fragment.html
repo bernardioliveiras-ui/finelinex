@@ -1,0 +1,23 @@
+<!-- Inserir DENTRO do painel autenticado Admin; API de escrita só aceita sessão ADMIN validada no Worker. -->
+<section id="fineline-admin-blog" class="fineline-admin-widget">
+  <h2>Blog da Fine Line 3D</h2>
+  <p>Escreva e salve rascunhos. Use Publicar para disponibilizar imediatamente na landing page.</p>
+  <form id="fineline-blog-form">
+    <div class="fineline-widget-grid">
+      <label>Título<input name="title" maxlength="150" required></label>
+      <label>Endereço (slug, opcional)<input name="slug" maxlength="90" placeholder="gerado pelo título"></label>
+      <label>URL da capa (opcional)<input name="coverImageUrl" type="url" placeholder="https://..."></label>
+      <label>Resumo (até 300 caracteres)<input name="excerpt" maxlength="300"></label>
+    </div>
+    <label style="display:block;margin-top:.8rem">Texto do artigo
+      <textarea name="body" maxlength="30000" style="width:100%;min-height:250px" required></textarea>
+    </label>
+    <div class="fineline-blog-buttons">
+      <button type="submit" data-status="draft">Salvar rascunho</button>
+      <button type="submit" data-status="published">Publicar agora</button>
+      <button type="button" id="fineline-blog-new">Novo artigo</button>
+    </div>
+  </form>
+  <p id="fineline-blog-admin-message" class="fineline-widget-alert" aria-live="polite"></p>
+  <div id="fineline-blog-admin-list" class="fineline-blog-admin-list"></div>
+</section>
