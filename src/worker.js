@@ -1,6 +1,7 @@
 import defaults from './defaults.js';
 import {AppError,validateQuote,validateProduct,validateSettings,validateUser,statuses} from './validation.js';
 import {checkPassword,cookie,newSession,requireSession,rateLimit,hash,tokenFrom,passwordHash,verifyPassword} from './auth.js';
+import {blogAdmin,blogPublic,listPublished,articleCards} from './blog.js';
 const csp="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'";
 function response(data,status=200,headers={}){return Response.json(data,{status,headers:{'Cache-Control':'no-store',...headers}});}
 function requireDb(env){if(!env.DB)throw new AppError('O recebimento de orçamentos ainda não está disponível. Entre em contato pelo WhatsApp.',503);return env.DB;}
@@ -47,6 +48,7 @@ async function api(request,env,ctx){const path=new URL(request.url).pathname,met
  const user=await requireSession(request,db);
  if(path==='/api/admin/session'&&method==='GET')return response({authenticated:true,user:{id:user.id,name:user.name,username:user.username,role:user.role}});
  if(!path.startsWith('/api/admin/quotes')&&path!=='/api/admin/password'&&user.role!=='ADMIN')throw new AppError('Seu acesso é de atendimento. Esta área é exclusiva do administrador.',403);
+ if(path==='/api/admin/posts'||path.startsWith('/api/admin/posts/'))return response(await blogAdmin(db,path,method,()=>json(request,1100000)),method==='POST'?201:200);
  if(path==='/api/admin/quotes'&&method==='GET'){
   const rows=await db.prepare('SELECT * FROM quotes ORDER BY created_at DESC LIMIT 500').all();return response({quotes:rows.results});
  }
@@ -94,7 +96,19 @@ async function api(request,env,ctx){const path=new URL(request.url).pathname,met
 export default {async fetch(request,env,ctx){
  const u=new URL(request.url);let res;
  if(u.protocol==='http:'&&!['localhost','127.0.0.1','[::1]'].includes(u.hostname)){u.protocol='https:';return Response.redirect(u.href,308);}
- try{res=u.pathname.startsWith('/api/')?await api(request,env,ctx):await env.ASSETS.fetch(request);}
+ try{
+  if(u.pathname.startsWith('/api/'))res=await api(request,env,ctx);
+  else if(u.pathname==='/blog'||u.pathname.startsWith('/blog/')||u.pathname==='/sitemap.xml')res=await blogPublic(request,env.DB);
+  else{
+   res=await env.ASSETS.fetch(request);
+   if((u.pathname==='/'||u.pathname==='/index.html')&&request.method==='GET'&&res.ok&&res.headers.get('content-type')?.includes('text/html')){
+    let posts=[];try{posts=await listPublished(env.DB,3);}catch{console.error('Blog indisponível; página principal preservada.');}
+    const html=(await res.text()).replace('<!-- BLOG_POSTS -->',articleCards(posts)||'<p class="blog-empty">Novos conteúdos sobre impressão e modelagem 3D em breve.</p>');
+    const headers=new Headers(res.headers);headers.set('Cache-Control','no-store');headers.delete('Content-Length');headers.delete('ETag');
+    res=new Response(html,{status:res.status,headers});
+   }
+  }
+ }
  catch(e){const status=e instanceof AppError?e.status:500;if(status===500)console.error('Falha na API FineLine:',e.message);res=response({error:status===500?'Não foi possível concluir agora. Tente novamente ou fale pelo WhatsApp.':e.message},status);}
- const headers=new Headers(res.headers);headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','strict-origin-when-cross-origin');headers.set('X-Frame-Options','DENY');headers.set('Content-Security-Policy',csp);if(u.pathname.startsWith('/admin'))headers.set('Cache-Control','no-store');return new Response(res.body,{status:res.status,statusText:res.statusText,headers});
+ const headers=new Headers(res.headers);headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','strict-origin-when-cross-origin');headers.set('X-Frame-Options','DENY');headers.set('Content-Security-Policy',csp);if(u.pathname.startsWith('/admin'))headers.set('Cache-Control','no-store');return new Response(request.method==='HEAD'?null:res.body,{status:res.status,statusText:res.statusText,headers});
 }};

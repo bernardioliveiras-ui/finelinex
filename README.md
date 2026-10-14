@@ -1,3 +1,7 @@
+# Atualização 2.1.0 — Blog
+
+Consulte `ATUALIZACAO-BLOG.md` para publicar esta atualização e usar o blog no painel. A calculadora ainda não está incluída: o link de referência estava indisponível e é necessário receber o código ou uma referência acessível.
+
 # Fine Line 3D — site e painel prontos para Cloudflare
 
 Este pacote substitui a landing page anterior e acrescenta um painel em `/admin/`. A página e a API são publicadas juntas em um Cloudflare Worker; os produtos, conteúdos, acessos e orçamentos ficam no banco Cloudflare D1.
