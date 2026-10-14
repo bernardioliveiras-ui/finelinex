@@ -54,3 +54,60 @@ test('quotation rejects a WhatsApp made only of punctuation while preserving val
  assert.equal((await req(env,'/api/quotes','POST',{...base,whatsapp:'--------'})).status,400);
  assert.equal((await req(env,'/api/quotes','POST',{...base,whatsapp:'(11) 99999-8888'})).status,201);
 });
+
+test('Blogger country-specific HTTPS redirect is read safely without losing posts',async t=>{
+ const env=fixture(),cookie=await login(env);const attempted=[];
+ t.mock.method(globalThis,'fetch',async url=>{
+  const u=new URL(url);attempted.push(u.href);
+  if(u.hostname==='fineline3d.blogspot.com')return new Response(null,{status:302,headers:{Location:'https://fineline3d.blogspot.com.br/feeds/posts/default?alt=json&max-results=50'}});
+  if(u.hostname==='fineline3d.blogspot.com.br')return Response.json({feed:{entry:[{id:{$t:'tag:blogger.com,1999:blog-223024082882083312.post-101'},title:{$t:'Artigo Fineline'},published:{$t:'2026-10-14T08:00:00Z'},link:[{rel:'alternate',href:'http://fineline3d.blogspot.com.br/2026/10/postagem.html'}],content:{$t:'Conteúdo acessível'}}]}});
+  throw Error('Host inesperado: '+u.hostname);
+ });
+ const result=await req(env,'/api/admin/blog-source','PUT',{url:'https://fineline3d.blogspot.com',enabled:true,version:0},cookie);
+ assert.equal(result.status,200,await result.clone().text());
+ assert.equal((await result.json()).source.count,1);
+ assert.equal(attempted.length,2);
+ assert.match(await (await req(env,'/blog/blogger-101')).text(),/Artigo Fineline/);
+});
+
+test('Official Blogger numeric-ID feed is attempted after Blogspot HTTP failure',async t=>{
+ const env=fixture(),cookie=await login(env);const attempted=[];
+ t.mock.method(globalThis,'fetch',async url=>{
+  const u=new URL(url);attempted.push(u.hostname);
+  if(u.hostname==='fineline3d.blogspot.com')return new Response('blocked',{status:403});
+  if(u.hostname==='www.blogger.com')return Response.json({feed:{id:{$t:'tag:blogger.com,1999:blog-223024082882083312'},entry:[{id:{$t:'tag:blogger.com,1999:blog-223024082882083312.post-202'},title:{$t:'Blogger por ID'},published:{$t:'2026-10-14T08:00:00Z'},link:[{rel:'alternate',href:'https://fineline3d.blogspot.com/2026/10/postagem-2.html'}],content:{$t:'Importação concluída'}}]}});
+  throw Error('Host inesperado: '+u.hostname);
+ });
+ const result=await req(env,'/api/admin/blog-source','PUT',{url:'https://fineline3d.blogspot.com',enabled:true,version:0},cookie);
+ assert.equal(result.status,200,await result.clone().text());
+ assert.equal((await result.json()).source.count,1);
+ assert.deepEqual(attempted,['fineline3d.blogspot.com','www.blogger.com']);
+ assert.match(await (await req(env,'/')).text(),/Blogger por ID/);
+});
+
+test('Blogger redirects to an unapproved host are blocked and errors explain the failure',async t=>{
+ const env=fixture(),cookie=await login(env);let attempts=0;
+ t.mock.method(globalThis,'fetch',async url=>{
+  attempts++;
+  if(new URL(url).hostname==='fineline3d.blogspot.com')return new Response(null,{status:302,headers:{Location:'http://127.0.0.1/private'}});
+  return new Response('not found',{status:404});
+ });
+ const response=await req(env,'/api/admin/blog-source','PUT',{url:'https://fineline3d.blogspot.com',enabled:true,version:0},cookie);
+ assert.equal(response.status,502);
+ const {error}=await response.json();assert.match(error,/redirecionamento/i);assert.match(error,/HTTP 404/);assert.match(error,/preservada/);
+ assert.equal(attempts,2);
+ const source=(await (await req(env,'/api/admin/blog-source','GET',null,cookie)).json()).source;
+ assert.equal(source.enabled,false);assert.equal(source.version,0);
+});
+
+test('feed diagnostic is admin-only and never changes the saved connection',async t=>{
+ const env=fixture(),cookie=await login(env);
+ t.mock.method(globalThis,'fetch',async()=>Response.json({feed:{entry:[{id:{$t:'tag:blogger.com,1999:blog-223024082882083312.post-303'},title:{$t:'Diagnóstico'},published:{$t:'2026-10-14T08:00:00Z'},link:[{rel:'alternate',href:'https://fineline3d.blogspot.com/2026/10/t.html'}]}]}}));
+ const path='/api/admin/blog-source/test';
+ assert.equal((await req(env,path,'POST',{url:'https://fineline3d.blogspot.com'})).status,401);
+ const response=await req(env,path,'POST',{url:'https://fineline3d.blogspot.com'},cookie);
+ assert.equal(response.status,200);
+ assert.deepEqual((await response.json()).result.titles,['Diagnóstico']);
+ const state=(await (await req(env,'/api/admin/blog-source','GET',null,cookie)).json()).source;
+ assert.equal(state.version,0);assert.equal(state.enabled,false);
+});

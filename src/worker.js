@@ -1,4 +1,4 @@
-import {feedState,saveFeed,refreshFeed} from './blog-feed.js';
+import {feedState,saveFeed,refreshFeed,testBlogFeed} from './blog-feed.js';
 import defaults from './defaults.js';
 import {AppError,validateQuote,validateProduct,validateSettings,validateUser,statuses} from './validation.js';
 import {checkPassword,cookie,newSession,requireSession,rateLimit,hash,tokenFrom,passwordHash,verifyPassword} from './auth.js';
@@ -50,6 +50,7 @@ async function api(request,env,ctx){const path=new URL(request.url).pathname,met
  if(path==='/api/admin/session'&&method==='GET')return response({authenticated:true,user:{id:user.id,name:user.name,username:user.username,role:user.role}});
  if(!path.startsWith('/api/admin/quotes')&&path!=='/api/admin/password'&&user.role!=='ADMIN')throw new AppError('Seu acesso é de atendimento. Esta área é exclusiva do administrador.',403);
  if(path==='/api/admin/blog-source'&&method==='GET')return response({source:await feedState(db)});
+ if(path==='/api/admin/blog-source/test'&&method==='POST')return response({result:await testBlogFeed((await json(request)).url)});
  if(path==='/api/admin/blog-source'&&method==='PUT')return response({source:await saveFeed(db,await json(request))});
  if(path==='/api/admin/blog-source/sync'&&method==='POST')return response({source:await refreshFeed(db,true)});
  if(path==='/api/admin/posts'||path.startsWith('/api/admin/posts/'))return response(await blogAdmin(db,path,method,()=>json(request,1100000)),method==='POST'?201:200);

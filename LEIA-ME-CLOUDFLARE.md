@@ -1,4 +1,4 @@
-# Fine Line 3D 2.3.0 — atualização completa
+# Fine Line 3D 2.3.1 — atualização completa
 
 ## O que você receberá
 
@@ -51,9 +51,10 @@ O arquivo `wrangler.jsonc` já contém:
 
 1. No Blogger, deixe o blog público. Em **Configurações → Feed do site → Permitir feed do blog**, selecione **Completo**. Feed “Curto” só disponibiliza o resumo; feed desativado ou blog privado impede a leitura.
 2. Abra **https://fineline3d.com.br/admin/** → **Blog → Conectar meu Blogger**.
-3. Cole **https://bernmkt.blogspot.com** (ou o endereço do Blogger que você deseja exibir).
-4. Deixe “Mostrar os artigos do Blogger no site” marcado e clique em **Salvar conexão**.
-5. Aguarde a confirmação com a quantidade de artigos. Use **Atualizar agora** para verificar novas postagens imediatamente.
+3. Cole **https://fineline3d.blogspot.com**.
+4. Clique em **Testar conexão**. Se ele indicar artigos encontrados, marque **Mostrar os artigos do Blogger no site**.
+5. Clique em **Salvar conexão** e aguarde a confirmação. Use **Atualizar agora** para verificar novas postagens imediatamente.
+6. Se aparecer um erro, anote as duas tentativas (Blogspot e Blogger ID) e abra `https://fineline3d.blogspot.com/feeds/posts/default?alt=json` em janela anônima. Veja `DIAGNOSTICO-BLOGGER.md`.
 
 Depois basta publicar no Blogger. O Worker busca o feed a cada 15 minutos e também pode atualizar em segundo plano quando a LP é visitada. Não exige que o admin fique aberto. Esse fluxo faz leitura; não publica conteúdo de volta no Blogger.
 
@@ -71,7 +72,7 @@ A calculadora usa os custos informados pelo visitante. Não é uma cotação aut
 
 ## Validação deste pacote
 
-Os resultados estão em `VALIDACAO-2.3.0.md`. A publicação na sua conta Cloudflare ainda precisa ser realizada com os passos acima; nenhum deploy remoto foi executado durante a preparação.
+Os resultados estão em `VALIDACAO-2.3.1.md`. A publicação na sua conta Cloudflare ainda precisa ser realizada com os passos acima; nenhum deploy remoto foi executado durante a preparação.
 
 Referências oficiais:
 - https://developers.cloudflare.com/workers/ci-cd/builds/configuration/
